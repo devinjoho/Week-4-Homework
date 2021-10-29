@@ -3,13 +3,6 @@ title: "Week4Homework"
 output: html_document
 ---
 
-```{r}
-install.packages(usethis)
-library(usethis)
-
-```
-
-
 This is my Week 4 homework assignment for CASA0005.
 
 The task this week is to:
@@ -20,13 +13,22 @@ Join the global gender inequality index to spatial data of the World, creating a
 
 Share it with the World on GitHub
 
-Add you repository URL to the circulated spreadsheet
+Add your repository URL to the circulated spreadsheet
 
+# Load libraries and read data
 ```{r}
 library(sf)
-gender<-read.csv('Gender Inequality Index (GII).csv')
-countries<-st_read('World_Countries__Generalized_.shp')
+library(here)
+library(countrycode)
+library(dplyr)
+library(tmap)
+library(tmaptools)
+
+gender<-read.csv(here::here('Gender Inequality Index (GII).csv'))
+countries<-st_read(here::here('World_Countries__Generalized_.shp'))
 ```
+
+# Create variable for 2010-2019 equality difference
 ```{r}
 gender[gender=='..']<-NA
 
@@ -39,9 +41,30 @@ gender$improvement<-improve(x=as.numeric(gender$X2010),y=as.numeric(gender$X2019
 
 The added 'improvement' variable in this data represents the change in gender inequality index for a given country between 2010 and 2019, where a negative score indicates a decrease in gender equality and a positive score indicates an increase in gender equality.
 
+# Join CSV to spatial data
 ```{r}
-equality_shapefile<-merge(countries,gender,by.x='COUNTRYAFF',by.y='Country')
+gender2<-gender%>%
+  slice(1:189,)%>%
+  mutate(iso_code=countrycode(Country,origin ='country.name', destination = 'iso2c' ))
+
+equality_shapefile<-left_join(countries,gender2,by=c('AFF_ISO'='iso_code'))
 ```
+
+Below is a quick map illustrating the global change in gender equality between 2010 and 2019.
+
+```{r}
+tm_shape(equality_shapefile)+
+  tm_polygons('improvement')
+```
+
+
+
+
+
+
+
+
+
 
 
 
