@@ -1,0 +1,47 @@
+---
+title: "Week4Homework"
+output: html_document
+---
+
+```{r}
+install.packages(usethis)
+library(usethis)
+
+```
+
+
+This is my Week 4 homework assignment for CASA0005.
+
+The task this week is to:
+
+Read in global gender inequality data
+
+Join the global gender inequality index to spatial data of the World, creating a new column of difference in inequality between 2010 and 2019
+
+Share it with the World on GitHub
+
+Add you repository URL to the circulated spreadsheet
+
+```{r}
+library(sf)
+gender<-read.csv('Gender Inequality Index (GII).csv')
+countries<-st_read('World_Countries__Generalized_.shp')
+```
+```{r}
+gender[gender=='..']<-NA
+
+improve<-function(x,y,NA.RM=TRUE){
+  x-y
+}
+
+gender$improvement<-improve(x=as.numeric(gender$X2010),y=as.numeric(gender$X2019))
+```
+
+The added 'improvement' variable in this data represents the change in gender inequality index for a given country between 2010 and 2019, where a negative score indicates a decrease in gender equality and a positive score indicates an increase in gender equality.
+
+```{r}
+equality_shapefile<-merge(countries,gender,by.x='COUNTRYAFF',by.y='Country')
+```
+
+
+
